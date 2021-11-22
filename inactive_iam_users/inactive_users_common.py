@@ -78,10 +78,14 @@ def get_number_of_inactive_days_for_user(inactivity_in_days):
 
 def check_if_user_breaches_threshold(iam_username, number_of_inactive_days, threshold):
     if number_of_inactive_days >= threshold:
-        logging.info(f"{iam_username} has been inactive for {number_of_inactive_days} days")
+        logging.info(
+            f"{iam_username} has been inactive for {number_of_inactive_days} days"
+        )
         action_to_be_taken = True
     else:
-        logging.info(f"{iam_username} has been inactive for {number_of_inactive_days}, which is not in the {threshold} threshold")
+        logging.info(
+            f"{iam_username} has been inactive for {number_of_inactive_days}, which is not in the {threshold} threshold"
+        )
         action_to_be_taken = False
     return action_to_be_taken
 
@@ -120,6 +124,8 @@ def get_inactive_iam_users(csv_filename):
                 iam_username = row[1]
                 inactivity_in_days = row[2]
                 inactive_iam_users[iam_username] = {}
-                inactive_iam_users[iam_username].update({'account_id': account_id})
-                inactive_iam_users[iam_username].update({'inactivity_in_days': inactivity_in_days})
+                inactive_iam_users[iam_username].update({"account_id": account_id})
+                inactive_iam_users[iam_username].update(
+                    {"inactivity_in_days": inactivity_in_days}
+                )
     return inactive_iam_users

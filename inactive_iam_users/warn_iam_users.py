@@ -5,27 +5,31 @@ logging.basicConfig(level=logging.INFO)
 
 
 def warn_iam_users():
-    (
-        csv_filename,
-        ignore_list,
-        threshold,
-        api_key,
-        template_id
-    ) = get_args()
+    (csv_filename, ignore_list, threshold, api_key, template_id) = get_args()
     dict_of_users = get_inactive_iam_users(csv_filename=csv_filename)
     for user in dict_of_users:
-        account_id = (dict_of_users[user]['account_id'])
-        inactivity_in_days = (dict_of_users[user]['inactivity_in_days'])
-        user_in_ignore_list = check_if_user_in_ignore_list(iam_username=user, ignore_list=ignore_list)
+        account_id = dict_of_users[user]["account_id"]
+        inactivity_in_days = dict_of_users[user]["inactivity_in_days"]
+        user_in_ignore_list = check_if_user_in_ignore_list(
+            iam_username=user, ignore_list=ignore_list
+        )
         if user_in_ignore_list:
             logging.info(f"User {user} is in the ignore list, so no action to be taken")
         else:
-            number_of_inactive_days = int(get_number_of_inactive_days_for_user(
-               inactivity_in_days=inactivity_in_days
-            ))
-            user_breaches_threshold = check_if_user_breaches_threshold(iam_username=user, number_of_inactive_days=number_of_inactive_days, threshold=int(threshold))
+            number_of_inactive_days = int(
+                get_number_of_inactive_days_for_user(
+                    inactivity_in_days=inactivity_in_days
+                )
+            )
+            user_breaches_threshold = check_if_user_breaches_threshold(
+                iam_username=user,
+                number_of_inactive_days=number_of_inactive_days,
+                threshold=int(threshold),
+            )
             if user_breaches_threshold:
-                logging.info(f"Sending email notification to {user} regarding inactivity on {account_id}")
+                logging.info(
+                    f"Sending email notification to {user} regarding inactivity on {account_id}"
+                )
                 send_email_via_notify(
                     api_key=api_key,
                     aws_account=account_id,
@@ -34,7 +38,9 @@ def warn_iam_users():
                     max_number_of_days=threshold,
                     template_id=template_id,
                 )
-                logging.info(f"Email sent to {user} regarding inactivity on {account_id}")
+                logging.info(
+                    f"Email sent to {user} regarding inactivity on {account_id}"
+                )
 
 
 warn_iam_users()
