@@ -17,6 +17,25 @@ def create_iam_client():
         exit(1)
 
 
+def check_if_user_exists(aws_account, iam_client, iam_user):
+    try:
+        logging.debug(
+            f"Checking to see if user {iam_user} exists in AWS account: {aws_account}"
+        )
+        iam_client.get_user(UserName=iam_user)
+        return True
+    except iam_client.exceptions.NoSuchEntityException:
+        logging.debug(
+            f"User {iam_user} does exist in {aws_account}, no action to be taken"
+        )
+        return False
+    except botocore.exceptions.ClientError as e:
+        logging.error(
+            f"Unable to check if IAM user {iam_user} exists in {aws_account}: {e}"
+        )
+        exit(1)
+
+
 def delete_iam_login_profile(aws_account, iam_client, iam_user):
     try:
         logging.info(
@@ -249,33 +268,39 @@ def delete_iam_user_account(aws_account, iam_client, iam_user):
 
 
 def delete_iam_user(aws_account, iam_client, iam_user):
-    delete_iam_login_profile(
-        aws_account=aws_account, iam_client=iam_client, iam_user=iam_user
-    )
-    delete_user_access_keys(
-        aws_account=aws_account, iam_client=iam_client, iam_user=iam_user
-    )
-    delete_user_signing_certificates(
-        aws_account=aws_account, iam_client=iam_client, iam_user=iam_user
-    )
-    delete_user_public_ssh_keys(
-        aws_account=aws_account, iam_client=iam_client, iam_user=iam_user
-    )
-    delete_user_service_specific_credentials(
-        aws_account=aws_account, iam_client=iam_client, iam_user=iam_user
-    )
-    delete_user_policies(
-        aws_account=aws_account, iam_client=iam_client, iam_user=iam_user
-    )
-    delete_user_mfa_device(
-        aws_account=aws_account, iam_client=iam_client, iam_user=iam_user
-    )
-    delete_attached_user_policies(
-        aws_account=aws_account, iam_client=iam_client, iam_user=iam_user
-    )
-    delete_user_from_groups(
-        aws_account=aws_account, iam_client=iam_client, iam_user=iam_user
-    )
-    delete_iam_user_account(
-        aws_account=aws_account, iam_client=iam_client, iam_user=iam_user
-    )
+    user_exists = check_if_user_exists(aws_account, iam_client, iam_user)
+    if user_exists:
+        delete_iam_login_profile(
+            aws_account=aws_account, iam_client=iam_client, iam_user=iam_user
+        )
+        delete_user_access_keys(
+            aws_account=aws_account, iam_client=iam_client, iam_user=iam_user
+        )
+        delete_user_signing_certificates(
+            aws_account=aws_account, iam_client=iam_client, iam_user=iam_user
+        )
+        delete_user_public_ssh_keys(
+            aws_account=aws_account, iam_client=iam_client, iam_user=iam_user
+        )
+        delete_user_service_specific_credentials(
+            aws_account=aws_account, iam_client=iam_client, iam_user=iam_user
+        )
+        delete_user_policies(
+            aws_account=aws_account, iam_client=iam_client, iam_user=iam_user
+        )
+        delete_user_mfa_device(
+            aws_account=aws_account, iam_client=iam_client, iam_user=iam_user
+        )
+        delete_attached_user_policies(
+            aws_account=aws_account, iam_client=iam_client, iam_user=iam_user
+        )
+        delete_user_from_groups(
+            aws_account=aws_account, iam_client=iam_client, iam_user=iam_user
+        )
+        delete_iam_user_account(
+            aws_account=aws_account, iam_client=iam_client, iam_user=iam_user
+        )
+        return True
+    else:
+        logging.info(f"Could not find user {iam_user} in {aws_account}, continuing")
+        return False
