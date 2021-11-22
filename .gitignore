@@ -132,3 +132,4 @@ venv/*
 *.xml
 *.iml
 *.idea
+*.csv
