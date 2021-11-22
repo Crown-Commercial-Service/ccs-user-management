@@ -1,6 +1,4 @@
 import argparse
-import boto3
-import botocore.exceptions
 import csv
 import logging
 from notifications_python_client.notifications import NotificationsAPIClient

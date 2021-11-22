@@ -1,6 +1,3 @@
-import boto3
-import botocore.exceptions
-import os
 import logging
 from inactive_users_common import *
 from delete_iam_user import *
