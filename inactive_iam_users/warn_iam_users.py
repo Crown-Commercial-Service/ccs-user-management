@@ -27,20 +27,26 @@ def warn_iam_users():
                 threshold=int(threshold),
             )
             if user_breaches_threshold:
-                logging.info(
-                    f"Sending email notification to {user} regarding inactivity on {account_id}"
-                )
-                send_email_via_notify(
-                    api_key=api_key,
-                    aws_account=account_id,
-                    email_address=user,
-                    inactive_number_of_days=number_of_inactive_days,
-                    max_number_of_days=threshold,
-                    template_id=template_id,
-                )
-                logging.info(
-                    f"Email sent to {user} regarding inactivity on {account_id}"
-                )
+                user_has_email_address = check_iam_user_has_email_address(iam_user=user)
+                if user_has_email_address:
+                    logging.info(
+                        f"Sending email notification to {user} regarding inactivity on {account_id}"
+                    )
+                    send_email_via_notify(
+                        api_key=api_key,
+                        aws_account=account_id,
+                        email_address=user,
+                        inactive_number_of_days=number_of_inactive_days,
+                        max_number_of_days=threshold,
+                        template_id=template_id,
+                    )
+                    logging.info(
+                        f"Email sent to {user} regarding inactivity on {account_id}"
+                    )
+                else:
+                    logging.info(
+                        f"{user} does not appear to be in an email address format, no email to be sent"
+                    )
 
 
 warn_iam_users()

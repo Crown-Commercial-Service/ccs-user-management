@@ -127,3 +127,10 @@ def get_inactive_iam_users(csv_filename):
                     {"inactivity_in_days": inactivity_in_days}
                 )
     return inactive_iam_users
+
+
+def check_iam_user_has_email_address(iam_user):
+    if "@" in iam_user:
+        return True
+    else:
+        return False
