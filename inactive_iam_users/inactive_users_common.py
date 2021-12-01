@@ -1,5 +1,4 @@
 import argparse
-import csv
 import logging
 from notifications_python_client.notifications import NotificationsAPIClient
 
@@ -10,9 +9,27 @@ def parse_arguments():
     description = "Arguments to manage stale IAM users"
     parser = argparse.ArgumentParser(description=description)
     parser.add_argument(
-        "--csv-filename",
-        help="The name of the CSV file containing stale IAM users",
-        dest="csv_filename",
+        "--account-id",
+        help="The name of the relevant user account ID",
+        dest="account_id",
+        required=True,
+    )
+    parser.add_argument(
+        "--api-key",
+        help="The API Key needed to authenticate with Gov UK Notify",
+        dest="api_key",
+        required=True,
+    )
+    parser.add_argument(
+        "--days-inactive",
+        help="The number of days that the relevant account has been inactive",
+        dest="days_inactive",
+        required=True,
+    )
+    parser.add_argument(
+        "--deletion-threshold",
+        help="The threshold at which a user should be deleted",
+        dest="deletion_threshold",
         required=True,
     )
     parser.add_argument(
@@ -23,38 +40,44 @@ def parse_arguments():
         required=False,
     )
     parser.add_argument(
-        "--threshold",
-        help="The threshold at which action needs to be taken against a given user",
-        dest="threshold",
-        required=True,
-    )
-    parser.add_argument(
-        "--api-key",
-        help="The API Key needed to authenticate with Gov UK Notify",
-        dest="api_key",
-        required=True,
-    )
-    parser.add_argument(
         "--template-id",
         help="The ID of the template to use in order to send emails via Gov UK Notify",
         dest="template_id",
+        required=True,
+    )
+    parser.add_argument(
+        "--username",
+        help="The name of the relevant IAM user",
+        dest="username",
+        required=True,
+    )
+    parser.add_argument(
+        "--warning-threshold",
+        help="The threshold at which a user should be warned",
+        dest="warning_threshold",
         required=True,
     )
     return parser.parse_args()
 
 
 def get_args(args=parse_arguments()):
-    csv_filename = args.csv_filename
-    ignore_list = args.ignore_list
-    threshold = args.threshold
+    account_id = args.account_id
     api_key = args.api_key
+    days_inactive = args.days_inactive
+    deletion_threshold = args.deletion_threshold
+    ignore_list = args.ignore_list
     template_id = args.template_id
+    username = args.username
+    warning_threshold = args.warning_threshold
     return (
-        csv_filename,
-        ignore_list,
-        threshold,
+        account_id,
         api_key,
+        days_inactive,
+        deletion_threshold,
+        ignore_list,
         template_id,
+        username,
+        warning_threshold,
     )
 
 
@@ -65,13 +88,6 @@ def check_if_user_in_ignore_list(iam_username, ignore_list):
             if user_to_ignore == iam_username:
                 user_should_be_ignored = True
                 return user_should_be_ignored
-
-
-def get_number_of_inactive_days_for_user(inactivity_in_days):
-    number_of_inactive_days = int(
-        "".join(list(filter(str.isdigit, inactivity_in_days)))
-    )
-    return number_of_inactive_days
 
 
 def check_if_user_breaches_threshold(iam_username, number_of_inactive_days, threshold):
@@ -107,26 +123,6 @@ def send_email_via_notify(
             "max_number_of_days": max_number_of_days,
         },
     )
-
-
-def get_inactive_iam_users(csv_filename):
-    inactive_iam_users = {}
-    with open(csv_filename) as inactive_iam_users_file:
-        csv_reader = csv.reader(inactive_iam_users_file, delimiter=",")
-        line_count = 0
-        for row in csv_reader:
-            if line_count == 0:
-                line_count += 1
-            else:
-                account_id = row[0]
-                iam_username = row[1]
-                inactivity_in_days = row[2]
-                inactive_iam_users[iam_username] = {}
-                inactive_iam_users[iam_username].update({"account_id": account_id})
-                inactive_iam_users[iam_username].update(
-                    {"inactivity_in_days": inactivity_in_days}
-                )
-    return inactive_iam_users
 
 
 def check_iam_user_has_email_address(iam_user):
