@@ -1,7 +1,6 @@
 import boto3
 import botocore.exceptions
 import logging
-from inactive_users_common import *
 
 logging.basicConfig(level=logging.INFO)
 
