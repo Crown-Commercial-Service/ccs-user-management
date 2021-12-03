@@ -1,7 +1,6 @@
 import logging
 from inactive_users_common import *
 from iam_common import *
-from get_inactive_iam_users import *
 
 logging.basicConfig(level=logging.INFO)
 
