@@ -7,7 +7,7 @@ logging.basicConfig(level=logging.INFO)
 
 
 def check_if_user_in_deletion_threshold(days_inactive, deletion_threshold, username):
-    if deletion_threshold <= days_inactive < deletion_threshold:
+    if days_inactive >= deletion_threshold:
         logging.info(
             f"{username} has been inactive for {days_inactive} days and should be deleted"
         )
@@ -44,7 +44,7 @@ def delete_inactive_iam_user():
         )
         if user_in_deletion_threshold:
             logging.info(
-                f"Proceeding with IAM account deletion for {user} in {account_id}"
+                f"Proceeding with IAM account deletion for {username} in {account_id}"
             )
             iam_client = create_iam_client()
             iam_user_deleted = delete_iam_user_handler(
