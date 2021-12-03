@@ -6,7 +6,7 @@ logging.basicConfig(level=logging.INFO)
 
 
 def check_if_user_in_deletion_threshold(days_inactive, deletion_threshold, username):
-    if days_inactive >= deletion_threshold:
+    if int(days_inactive) >= int(deletion_threshold):
         logging.info(
             f"{username} has been inactive for {days_inactive} days and should be deleted"
         )
