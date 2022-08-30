@@ -7,7 +7,7 @@ logging.basicConfig(level=logging.INFO)
 def check_if_user_in_warning_threshold(
     days_inactive, deletion_threshold, username, warning_threshold
 ):
-    if warning_threshold <= days_inactive < deletion_threshold:
+    if int(warning_threshold) <= int(days_inactive) < int(deletion_threshold):
         logging.info(
             f"{username} has been inactive for {days_inactive} days and should be warned"
         )
