@@ -68,10 +68,12 @@ def delete_user_access_keys(aws_account, iam_client, iam_user):
             logging.info(
                 f"Deleted all access keys associated with user {iam_user} in AWS account {aws_account}"
             )
+            return True
         else:
             logging.info(
                 f"No access keys found to be associated with user {iam_user} in AWS account {aws_account}"
             )
+            return False
     except botocore.exceptions.ClientError as e:
         logging.error(f"Unable to delete access keys for user {iam_user}: {e}")
         exit(1)
