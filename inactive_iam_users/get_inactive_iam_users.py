@@ -26,19 +26,15 @@ def get_inactive_iam_users(csv_filename):
     inactive_iam_users = {}
     with open(csv_filename) as inactive_iam_users_file:
         csv_reader = csv.reader(inactive_iam_users_file, delimiter=",")
-        line_count = 0
         for row in csv_reader:
-            if line_count == 0:
-                line_count += 1
-            else:
-                account_id = row[0]
-                iam_username = row[1]
-                inactivity_in_days = row[2]
-                inactive_iam_users[iam_username] = {}
-                inactive_iam_users[iam_username].update({"account_id": account_id})
-                inactive_iam_users[iam_username].update(
-                    {"inactivity_in_days": inactivity_in_days}
-                )
+            account_id = row[0]
+            iam_username = row[1]
+            inactivity_in_days = row[2]
+            inactive_iam_users[iam_username] = {}
+            inactive_iam_users[iam_username].update({"account_id": account_id})
+            inactive_iam_users[iam_username].update(
+                {"inactivity_in_days": inactivity_in_days}
+            )
     return inactive_iam_users
 
 
