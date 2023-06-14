@@ -54,7 +54,7 @@ def get_list_of_files_from_s3(folder_path, s3_bucket_name, s3_client):
                 logging.debug(
                     f"Removing returned object that matches folder path {folder_path}"
                 )
-            list_of_files_from_s3.remove(file)
+                list_of_files_from_s3.remove(file)
         logging.info("List of files successfully obtained")
         return list_of_files_from_s3
     except botocore.exceptions.ClientError as e:
