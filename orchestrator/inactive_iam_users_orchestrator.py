@@ -24,13 +24,21 @@ def parse_arguments():
         default="expired_iam_users/",
         required=False,
     )
+    parser.add_argument(
+        "--ignore-list",
+        help="Comma separated containing IAM users to ignore/exclude when filtering through stale users",
+        dest="ignore_list",
+        default="",
+        required=False,
+    )
     return parser.parse_args()
 
 
 def get_args(args=parse_arguments()):
     s3_bucket_name = args.s3_bucket_name
     folder_path = args.folder_path
-    return s3_bucket_name, folder_path
+    ignore_list = args.ignore_list
+    return s3_bucket_name, folder_path, ignore_list
 
 
 def create_s3_client():
@@ -38,7 +46,16 @@ def create_s3_client():
     return s3_client
 
 
-def get_list_of_files_from_s3(folder_path, s3_bucket_name, s3_client):
+def check_if_user_in_ignore_list(username, ignore_list):
+    users_to_ignore = ignore_list.split(",")
+    if users_to_ignore:
+        for user_to_ignore in users_to_ignore:
+            if user_to_ignore == username:
+                user_should_be_ignored = True
+                return user_should_be_ignored
+
+
+def get_list_of_files_from_s3(folder_path, ignore_list, s3_bucket_name, s3_client):
     try:
         list_of_files_from_s3 = []
         logging.info(
@@ -48,13 +65,20 @@ def get_list_of_files_from_s3(folder_path, s3_bucket_name, s3_client):
             Bucket=s3_bucket_name, Prefix=folder_path
         )
         for object in objects_in_path["Contents"]:
-            list_of_files_from_s3.append(object["Key"])
-        for file in list_of_files_from_s3:
-            if file == folder_path:
-                logging.debug(
-                    f"Removing returned object that matches folder path {folder_path}"
-                )
-                list_of_files_from_s3.remove(file)
+            user_in_ignore_list = check_if_user_in_ignore_list(
+                username=object["Key"], ignore_list=ignore_list
+            )
+            if user_in_ignore_list:
+                logging.info(f'{object["Key"]} is in the ignore list, so no action to be taken')
+            else:
+                list_of_files_from_s3.append(object["Key"])
+                print(list_of_files_from_s3)
+                for file in list_of_files_from_s3:
+                    if file == folder_path:
+                        logging.debug(
+                            f"Removing returned object that matches folder path {folder_path}"
+                        )
+                        list_of_files_from_s3.remove(file)
         logging.info("List of files successfully obtained")
         return list_of_files_from_s3
     except botocore.exceptions.ClientError as e:
@@ -65,10 +89,10 @@ def get_list_of_files_from_s3(folder_path, s3_bucket_name, s3_client):
 
 
 def download_from_s3():
-    s3_bucket_name, folder_path = get_args()
+    s3_bucket_name, folder_path, ignore_list = get_args()
     s3_client = create_s3_client()
     list_of_files_from_s3 = get_list_of_files_from_s3(
-        folder_path=folder_path, s3_bucket_name=s3_bucket_name, s3_client=s3_client
+        folder_path=folder_path, s3_bucket_name=s3_bucket_name, s3_client=s3_client, ignore_list=ignore_list
     )
     print(list_of_files_from_s3)
     return list_of_files_from_s3
