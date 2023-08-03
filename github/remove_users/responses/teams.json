@@ -1,0 +1,44 @@
+[
+  {
+    "name": "test-admins",
+    "id": 1,
+    "slug": "test-admins",
+    "description": "admins group",
+    "privacy": "closed",
+    "notification_setting": "notifications_enabled",
+    "url": "https://api.github.com/organizations/1234/team/1",
+    "html_url": "https://github.com/orgs/testorg/teams/test-admins",
+    "members_url": "https://api.github.com/organizations/1234/team/1/members{/member}",
+    "repositories_url": "https://api.github.com/organizations/1234/team/1/repos",
+    "permission": "pull",
+    "parent": null
+  },
+  {
+    "name": "test-developers",
+    "id": 2,
+    "slug": "test-developers",
+    "description": "developers",
+    "privacy": "closed",
+    "notification_setting": "notifications_enabled",
+    "url": "https://api.github.com/organizations/1234/team/2",
+    "html_url": "https://github.com/orgs/testorg/teams/test-developers",
+    "members_url": "https://api.github.com/organizations/1234/team/2/members{/member}",
+    "repositories_url": "https://api.github.com/organizations/1234/team/2/repos",
+    "permission": "pull",
+    "parent": null
+  },
+  {
+    "name": "test-ops",
+    "id": 3,
+    "slug": "test-ops",
+    "description": "developers",
+    "privacy": "closed",
+    "notification_setting": "notifications_enabled",
+    "url": "https://api.github.com/organizations/1234/team/3",
+    "html_url": "https://github.com/orgs/testorg/teams/test-ops",
+    "members_url": "https://api.github.com/organizations/1234/team/3/members{/member}",
+    "repositories_url": "https://api.github.com/organizations/1234/team/3/repos",
+    "permission": "pull",
+    "parent": null
+  }
+]
