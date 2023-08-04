@@ -3,6 +3,7 @@ import logging
 from requests_cache import CachedSession, SQLiteCache
 import json
 import os
+import time
 
 from copy import deepcopy
 
@@ -95,17 +96,86 @@ def remove_ignored_teams(ignored_teams: list, teams: list):
         return _filtered_teams
 
 
+def get_github_team_members(name: str, test_payload: dict = None, headers: dict = get_headers()):
+    if not test_payload:
+        url = f"{github_api_base_url}/orgs/{github_org}/teams/{name}/members"
+        response = session.get(
+            url=url,
+            headers=headers
+        )
+        status_code = response.status_code
+        data = json.loads(response.text)
+    else:
+        status_code = 200
+        data = test_payload
+
+    if status_code == 200:
+        members = [user["login"]for user in data]
+        return members
+    return None
+
+
+def remove_github_user_from_team(team_name: str, user: str, headers: dict = get_headers()):
+    url = f"{github_api_base_url}/orgs/{github_org}/teams/{team_name}/memberships/{user}"
+    response = session.delete(
+        url=url,
+        headers=headers
+    )
+    status_code = response.status_code
+    if status_code == 204:
+        logger.info(f"Removed user: {user},from team: {team_name}")
+        return True
+    return False
+
+
+def manage_team_members(team_name: str, users: list, remove_users: bool = False):
+
+    for user in users:
+
+        if remove_users:
+            remove_github_user_from_team(team_name=team_name, user=user)
+        else:
+            logger.info(
+                f"Result: user: {user}, will be removed from team: {team_name}")
+
+
+def check_team_members(users_to_check: list, team_name: str):
+    users_to_remove = []
+    current_members = get_github_team_members(name=team_name)
+    for user in users_to_check:
+        if user in current_members:
+            users_to_remove.append(user)
+
+    return dict(
+        team_name=team_name,
+        users=users_to_remove
+    )
+
+
 def main():
     args = parse_arguments()
     users = args.users
-    dry_run = args.dry_run
+    remove_users = args.dry_run
     ignored_teams = args.ignore
     all_teams = get_github_teams()
     teams = remove_ignored_teams(ignored_teams=ignored_teams, teams=all_teams)
     logger.info(f"Teams to check: {teams}")
+    if remove_users:
+        logger.info(f"Pending changes, waiting for 5 seconds")
+        time.sleep(5)
+    else:
+        logger.info(f"No changes will be made: dry-run enabled")
+
+    # Starting tasks to loop through teams and users
+    for team in teams:
+        result = check_team_members(users_to_check=users, team_name=team)
+        if result["users"]:
+            manage_team_members(
+                team_name=team, users=result["users"], remove_users=remove_users)
 
     # Clear Cache
-    # session.cache.clear()
+    if remove_users:
+        session.cache.clear()
 
 
 if __name__ == "__main__":

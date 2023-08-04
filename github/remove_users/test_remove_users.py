@@ -1,4 +1,7 @@
-from remove_users import parse_arguments, get_github_teams, remove_ignored_teams
+from remove_users import (
+    parse_arguments, get_github_teams,
+    remove_ignored_teams, get_github_team_members
+)
 
 import pytest
 import json
@@ -122,7 +125,6 @@ def test_remove_ignored_teams_when_ignored_teams_is_empty():
     assert result == teams
 
 
-@pytest.mark.smoke
 def test_remove_ignored_teams_when_teams_is_empty():
     teams = []
     ignored_teams = ["test"]
@@ -130,3 +132,13 @@ def test_remove_ignored_teams_when_teams_is_empty():
     result = remove_ignored_teams(ignored_teams=ignored_teams, teams=teams)
 
     assert result == teams
+
+
+# Get GitHub team members
+def test_get_github_team_members():
+    test_payload = load_dataset(file_name="responses/members.json")
+
+    members = get_github_team_members(name="test", test_payload=test_payload)
+
+    assert len(members) == 3
+    assert members == ["user1", "user2", "user3"]
