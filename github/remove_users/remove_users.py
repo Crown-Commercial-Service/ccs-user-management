@@ -34,7 +34,7 @@ def parse_arguments():
     )
 
     # Add the --dry-run flag
-    parser.add_argument('--dry-run', action='store_true',
+    parser.add_argument('--dry-run', action='store_false',
                         help='Enable dry-run mode')
 
     # Add the --ignore flag
